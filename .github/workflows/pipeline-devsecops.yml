@@ -46,3 +46,17 @@ jobs:
         run: |
           docker build -t reddit-clone:${{ github.sha }} .
           docker tag reddit-clone:${{ github.sha }} reddit-clone:latest
+
+      # ETAPA 5: Análisis de seguridad de imagen con Trivy
+      - name: 5. Trivy Image Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'reddit-clone:latest'
+          format: 'table'
+          output: 'trivy-report.txt'
+          
+      - name: 5.1. Upload Trivy Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-report
+          path: trivy-report.txt
