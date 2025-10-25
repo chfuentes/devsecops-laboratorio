@@ -22,7 +22,7 @@ jobs:
       
       # ETAPA 2: Análisis SAST con SonarCloud
       - name: 2. SonarCloud Scan (SAST)
-        uses: SonarSource/sonarqube-scan-action@v4
+        uses: SonarSource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: https://sonarcloud.io
