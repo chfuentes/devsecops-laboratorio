@@ -2,13 +2,12 @@
 # Inicio del Pipeline
 
 name: Pipeline DevSecOps - Laboratorio Final
-# Trigger: Se ejecuta en cada push a la rama feature/pipeline-devsecops
+
 on:
   push:
     branches:
       - feature/pipeline-devsecops
 
-# Jobs del pipeline
 jobs:
   security-pipeline:
     name: Pipeline de Seguridad
@@ -18,3 +17,12 @@ jobs:
       # ETAPA 1: Clonación del repositorio
       - name: 1. Checkout del código
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Necesario para SonarCloud
+      
+      # ETAPA 2: Análisis SAST con SonarCloud
+      - name: 2. SonarCloud Scan (SAST)
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
