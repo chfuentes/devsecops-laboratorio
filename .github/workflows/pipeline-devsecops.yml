@@ -27,13 +27,17 @@ jobs:
           SONAR_HOST_URL: https://sonarcloud.io
       
       - name: 2.1. SonarCloud Quality Gate Check
+        id: sonar-quality-gate
         uses: sonarsource/sonarqube-quality-gate-action@master
+        continue-on-error: true
         timeout-minutes: 5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       
       # ETAPA 3: Análisis SCA con Dependency Check
       - name: 3. Dependency Check (SCA)
+        id: dependency-check
+        continue-on-error: true
         uses: dependency-check/Dependency-Check_Action@main
         with:
           project: 'devsecops-laboratorio'
@@ -58,6 +62,8 @@ jobs:
       
       # ETAPA 5: Análisis de seguridad de imagen con Trivy
       - name: 5. Trivy Image Scan
+        id: trivy-scan
+        continue-on-error: true
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: 'reddit-clone:latest'
@@ -72,3 +78,23 @@ jobs:
         with:
           name: trivy-report
           path: trivy-report.txt
+      
+      # VERIFICACIÓN FINAL: Falla si algún control de seguridad falló
+      - name: Security Gate - Final Check
+        if: steps.sonar-quality-gate.outcome == 'failure' || steps.dependency-check.outcome == 'failure' || steps.trivy-scan.outcome == 'failure'
+        run: |
+          echo "SECURITY GATE FAILED"
+          echo ""
+          echo "Failed checks:"
+          if [ "${{ steps.sonar-quality-gate.outcome }}" == "failure" ]; then
+            echo "  - SAST (SonarCloud): Quality Gate FAILED"
+          fi
+          if [ "${{ steps.dependency-check.outcome }}" == "failure" ]; then
+            echo "  - SCA (Dependency Check): Vulnerabilities found (CVSS >= 4)"
+          fi
+          if [ "${{ steps.trivy-scan.outcome }}" == "failure" ]; then
+            echo "  - Image Security (Trivy): Vulnerabilities found (CRITICAL/HIGH/MEDIUM)"
+          fi
+          echo ""
+          echo "Pipeline BLOCKED due to security vulnerabilities."
+          exit 1
