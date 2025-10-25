@@ -26,3 +26,17 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: https://sonarcloud.io
+
+      # ETAPA 3: Análisis SCA con Dependency Check
+      - name: 3. Dependency Check (SCA)
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: 'devsecops-laboratorio'
+          path: '.'
+          format: 'HTML'
+          
+      - name: 3.1. Upload Dependency Check Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-check-report
+          path: reports/
