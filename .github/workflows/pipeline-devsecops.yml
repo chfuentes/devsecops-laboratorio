@@ -1,6 +1,5 @@
 # Pipeline DevSecOps - Laboratorio Final curso DevSecOps
 # Inicio del Pipeline
-
 name: Pipeline DevSecOps - Laboratorio Final
 
 on:
@@ -26,7 +25,13 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: https://sonarcloud.io
-
+      
+      - name: 2.1. SonarCloud Quality Gate Check
+        uses: sonarsource/sonarqube-quality-gate-action@master
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      
       # ETAPA 3: Análisis SCA con Dependency Check
       - name: 3. Dependency Check (SCA)
         uses: dependency-check/Dependency-Check_Action@main
@@ -34,19 +39,23 @@ jobs:
           project: 'devsecops-laboratorio'
           path: '.'
           format: 'HTML'
+          args: >
+            --failOnCVSS 4
+            --enableRetired
           
       - name: 3.1. Upload Dependency Check Report
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: dependency-check-report
           path: reports/
-
+      
       # ETAPA 4: Construcción de imagen Docker
       - name: 4. Build Docker Image
         run: |
           docker build -t reddit-clone:${{ github.sha }} .
           docker tag reddit-clone:${{ github.sha }} reddit-clone:latest
-
+      
       # ETAPA 5: Análisis de seguridad de imagen con Trivy
       - name: 5. Trivy Image Scan
         uses: aquasecurity/trivy-action@master
@@ -54,9 +63,12 @@ jobs:
           image-ref: 'reddit-clone:latest'
           format: 'table'
           output: 'trivy-report.txt'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          exit-code: '1'
           
       - name: 5.1. Upload Trivy Report
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: trivy-report
           path: trivy-report.txt
