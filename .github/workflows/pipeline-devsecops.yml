@@ -1,2 +1,20 @@
 # Pipeline DevSecOps - Laboratorio Final curso DevSecOps
 # Inicio del Pipeline
+
+name: Pipeline DevSecOps - Laboratorio Final
+# Trigger: Se ejecuta en cada push a la rama feature/pipeline-devsecops
+on:
+  push:
+    branches:
+      - feature/pipeline-devsecops
+
+# Jobs del pipeline
+jobs:
+  security-pipeline:
+    name: Pipeline de Seguridad
+    runs-on: ubuntu-latest
+    
+    steps:
+      # ETAPA 1: Clonación del repositorio
+      - name: 1. Checkout del código
+        uses: actions/checkout@v4
