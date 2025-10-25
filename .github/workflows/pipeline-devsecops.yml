@@ -40,3 +40,9 @@ jobs:
         with:
           name: dependency-check-report
           path: reports/
+
+      # ETAPA 4: Construcción de imagen Docker
+      - name: 4. Build Docker Image
+        run: |
+          docker build -t reddit-clone:${{ github.sha }} .
+          docker tag reddit-clone:${{ github.sha }} reddit-clone:latest
