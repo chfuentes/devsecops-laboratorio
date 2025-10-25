@@ -18,11 +18,11 @@ jobs:
       - name: 1. Checkout del código
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Necesario para SonarCloud
+          fetch-depth: 0
       
       # ETAPA 2: Análisis SAST con SonarCloud
       - name: 2. SonarCloud Scan (SAST)
-        uses: SonarSource/sonarcloud-github-action@master
+        uses: SonarSource/sonarqube-scan-action@v4
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
